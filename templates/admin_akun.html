@@ -1,0 +1,9 @@
+{% extends 'base.html' %}{% block title %}Akun{% endblock %}
+{% block body %}<h1>Pengelolaan Akun</h1><div class="grid2">
+<div class="card scroll"><table><thead><tr><th>Nama</th><th>Username</th><th>Peran</th><th>Status</th><th></th></tr></thead><tbody>
+{% for r in rows %}<tr><td>{{ r.nama }}</td><td>{{ r.username }}</td><td>{{ ROLES[r.role] }}</td><td>{{ 'Aktif' if r.aktif else 'Nonaktif' }}</td>
+<td><form method="post" action="{{ url_for('admin_akun_aktif', uid=r.id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="btn ghost">{{ 'Nonaktifkan' if r.aktif else 'Aktifkan' }}</button></form></td></tr>{% endfor %}</tbody></table></div>
+<div class="card"><h2>Tambah akun</h2><form method="post"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<label>Nama<input name="nama" required></label><label>Username<input name="username" required></label>
+<label>Kata sandi<input name="password" type="password" minlength="6" required></label>
+<label>Peran<select name="role">{% for k, v in ROLES.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select></label><button class="btn">Tambah</button></form></div></div>{% endblock %}

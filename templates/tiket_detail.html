@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% block title %}{{ t.nomor }}{% endblock %}
+{% block body %}<h1>{{ t.nomor }} {% with s=t.status %}{% include '_status.html' %}{% endwith %}</h1>
+<div class="grid2"><div class="card"><h2>{{ t.judul }}</h2><p class="pre">{{ t.deskripsi }}</p>
+<dl><dt>Kategori</dt><dd>{{ t.kategori }}</dd><dt>Prioritas</dt><dd>{{ t.prioritas }}</dd><dt>Pelapor</dt><dd>{{ t.pelapor }}</dd><dt>Petugas</dt><dd>{{ t.petugas or 'Belum ditugaskan' }}</dd><dt>Dibuat</dt><dd>{{ t.dibuat }}</dd><dt>Diperbarui</dt><dd>{{ t.diperbarui }}</dd></dl></div>
+<div>
+{% if user.role == 'admin' %}<div class="card"><h2>Penugasan</h2><form method="post" action="{{ url_for('tiket_atur', tid=t.id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<label>Petugas<select name="petugas_id"><option value="">- Belum ditugaskan -</option>{% for p in petugas %}<option value="{{ p.id }}" {{ 'selected' if t.petugas_id==p.id }}>{{ p.nama }}</option>{% endfor %}</select></label>
+<label>Kategori<select name="kategori_id">{% for k in kat %}<option value="{{ k.id }}" {{ 'selected' if t.kategori_id==k.id }}>{{ k.nama }}</option>{% endfor %}</select></label>
+<label>Prioritas<select name="prioritas">{% for p in PRIORITAS %}<option {{ 'selected' if t.prioritas==p }}>{{ p }}</option>{% endfor %}</select></label>
+<button class="btn">Simpan</button></form></div>{% endif %}
+{% if user.role in ('petugas','admin') %}<div class="card"><h2>Perbarui status</h2><form method="post" action="{{ url_for('tiket_status', tid=t.id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<label>Status<select name="status">{% for s in STATUS %}<option {{ 'selected' if t.status==s }}>{{ s }}</option>{% endfor %}</select></label>
+<label>Catatan tindak lanjut<textarea name="catatan" rows="3" required></textarea></label>
+<button class="btn">Simpan catatan</button></form></div>{% endif %}
+</div></div>
+<div class="card"><h2>Riwayat penanganan</h2><ol class="timeline">{% for r in rw %}<li><b>{{ r.status }}</b> · {{ r.waktu }} · {{ r.nama }}<p class="pre">{{ r.catatan }}</p></li>{% endfor %}</ol></div>{% endblock %}

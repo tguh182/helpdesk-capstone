@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% block title %}Kategori{% endblock %}
+{% block body %}<h1>Kategori Gangguan</h1><div class="grid2">
+<div class="card"><table><thead><tr><th>Kategori</th><th>Jumlah tiket</th><th></th></tr></thead><tbody>
+{% for r in rows %}<tr><td>{{ r.nama }}</td><td>{{ r.n }}</td><td><form method="post" action="{{ url_for('admin_kategori_hapus', kid=r.id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="btn ghost">Hapus</button></form></td></tr>{% endfor %}</tbody></table></div>
+<div class="card"><h2>Tambah kategori</h2><form method="post"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><label>Nama kategori<input name="nama" required></label><button class="btn">Tambah</button></form></div></div>{% endblock %}

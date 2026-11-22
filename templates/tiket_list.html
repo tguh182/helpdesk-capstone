@@ -1,0 +1,8 @@
+{% extends 'base.html' %}{% block title %}Daftar Tiket{% endblock %}
+{% block body %}<h1>Daftar Tiket</h1>
+<form method="get" class="filters"><input name="q" value="{{ q }}" placeholder="Cari nomor atau judul" aria-label="Cari">
+<select name="status" aria-label="Status"><option value="">Semua status</option>{% for s in STATUS %}<option {{ 'selected' if s==st }}>{{ s }}</option>{% endfor %}</select>
+<button class="btn">Cari</button></form>
+<div class="card scroll">{% if rows %}<table><thead><tr><th>Nomor</th><th>Judul</th><th>Kategori</th><th>Prioritas</th><th>Pelapor</th><th>Petugas</th><th>Status</th></tr></thead><tbody>
+{% for t in rows %}<tr><td><a href="{{ url_for('tiket_detail', tid=t.id) }}">{{ t.nomor }}</a></td><td>{{ t.judul }}</td><td>{{ t.kategori }}</td><td>{{ t.prioritas }}</td><td>{{ t.pelapor }}</td><td>{{ t.petugas or '-' }}</td><td>{% with s=t.status %}{% include '_status.html' %}{% endwith %}</td></tr>{% endfor %}
+</tbody></table>{% else %}<p class="muted">Tidak ada tiket.</p>{% endif %}</div>{% endblock %}

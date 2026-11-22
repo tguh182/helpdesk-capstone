@@ -1,0 +1,7 @@
+{% extends 'base.html' %}{% block title %}Login{% endblock %}
+{% block body %}<div class="card narrow"><h1>Masuk</h1>
+<form method="post"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<label>Username<input name="username" required autofocus autocomplete="username"></label>
+<label>Kata sandi<input name="password" type="password" required autocomplete="current-password"></label>
+<button class="btn">Masuk</button></form>
+<p class="muted">Belum punya akun? <a href="{{ url_for('daftar') }}">Daftar sebagai pelapor</a></p></div>{% endblock %}

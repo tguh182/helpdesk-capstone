@@ -1,0 +1,8 @@
+{% extends 'base.html' %}{% block title %}Daftar{% endblock %}
+{% block body %}<div class="card narrow"><h1>Daftar Akun Pelapor</h1>
+<form method="post"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<label>Nama lengkap<input name="nama" required></label>
+<label>Username<input name="username" required autocomplete="username"></label>
+<label>Kata sandi (min. 6 karakter)<input name="password" type="password" minlength="6" required autocomplete="new-password"></label>
+<button class="btn">Daftar</button></form>
+<p class="muted"><a href="{{ url_for('login') }}">Kembali ke login</a></p></div>{% endblock %}

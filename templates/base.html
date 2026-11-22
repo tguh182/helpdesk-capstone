@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}Helpdesk{% endblock %} · Helpdesk TI</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head>
+<body>
+{% if user %}
+<header class="top"><div class="brand">Helpdesk TI</div>
+<nav>
+<a href="{{ url_for('dashboard') }}">Dashboard</a>
+<a href="{{ url_for('tiket_list') }}">Tiket</a>
+{% if user.role in ('pelapor','admin') %}<a href="{{ url_for('tiket_baru') }}">Buat Laporan</a>{% endif %}
+{% if user.role in ('admin','petugas') %}<a href="{{ url_for('rekap') }}">Rekapitulasi</a>{% endif %}
+{% if user.role == 'admin' %}<a href="{{ url_for('admin_akun') }}">Akun</a><a href="{{ url_for('admin_kategori') }}">Kategori</a>{% endif %}
+</nav>
+<form method="post" action="{{ url_for('logout') }}" class="who"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<span>{{ user.nama }} · {{ ROLES[user.role] }}</span><button class="btn ghost">Keluar</button></form>
+</header>{% endif %}
+<main class="wrap">
+{% with m = get_flashed_messages(with_categories=true) %}{% for c, t in m %}<div class="flash {{ c }}" role="alert">{{ t }}</div>{% endfor %}{% endwith %}
+{% block body %}{% endblock %}
+</main></body></html>
