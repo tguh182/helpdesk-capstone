@@ -1,7 +1,8 @@
 {% extends 'base.html' %}{% block title %}Buat Laporan{% endblock %}
-{% block body %}<div class="card narrow wide"><h1>Formulir Laporan Gangguan</h1>
+{% block body %}<div class="form-split"><div class="card"><h1>Formulir Laporan Gangguan</h1>
 <form method="post"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
 <label>Judul laporan<input name="judul" maxlength="150" required value="{{ f.get('judul','') }}"></label>
 <label>Kategori<select name="kategori_id" required><option value="">Pilih kategori</option>{% for k in kat %}<option value="{{ k.id }}" {{ 'selected' if f.get('kategori_id','')|string==k.id|string }}>{{ k.nama }}</option>{% endfor %}</select></label>
 <label>Deskripsi gangguan<textarea name="deskripsi" rows="6" maxlength="3000" required>{{ f.get('deskripsi','') }}</textarea></label>
-<button class="btn">Kirim laporan</button></form></div>{% endblock %}
+<button class="btn">Kirim laporan</button></form></div>
+<aside class="tips card">{% include '_ill_form.html' %}<h2>Tips melapor</h2><ul><li>Tulis judul yang singkat dan jelas.</li><li>Pilih kategori yang paling sesuai.</li><li>Jelaskan kapan masalah mulai terjadi dan apa yang sudah dicoba.</li></ul></aside></div>{% endblock %}

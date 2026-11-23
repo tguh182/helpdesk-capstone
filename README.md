@@ -1,4 +1,4 @@
-# Sistem Informasi Helpdesk Berbasis Web
+# SiTiket - Sistem Informasi Helpdesk Berbasis Web
 
 Aplikasi Capstone Project: pelaporan dan penanganan gangguan TI dengan sistem tiket.
 Dibangun dengan Python (Flask) dan SQLite.

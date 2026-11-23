@@ -1,6 +1,6 @@
 {% extends 'base.html' %}{% block title %}Daftar{% endblock %}
 {% block bodyclass %}auth{% endblock %}
-{% block outer %}<div class="auth-hero"><div class="hero-in">{% include '_logo.html' %}<h2>{{ APP_NAME }}</h2><p>Daftar sebagai pelapor untuk mulai membuat dan memantau laporan gangguan.</p></div></div>
+{% block outer %}<div class="auth-hero"><div class="hero-in">{% include '_ill_hero.html' %}<h2>{{ APP_NAME }}</h2><p>Daftar sebagai pelapor untuk mulai membuat dan memantau laporan gangguan.</p></div></div>
 <main class="auth-form">{% with m = get_flashed_messages(with_categories=true) %}{% for c, t in m %}<div class="flash {{ c }}" role="alert">{{ t }}</div>{% endfor %}{% endwith %}<div class="card narrow"><h1>Daftar Akun Pelapor</h1>
 <form method="post"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
 <label>Nama lengkap<input name="nama" required></label>

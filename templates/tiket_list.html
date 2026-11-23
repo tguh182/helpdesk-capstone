@@ -5,4 +5,4 @@
 <button class="btn">Cari</button></form>
 <div class="card scroll">{% if rows %}<table><thead><tr><th>Nomor</th><th>Judul</th><th>Kategori</th><th>Prioritas</th><th>Pelapor</th><th>Petugas</th><th>Status</th></tr></thead><tbody>
 {% for t in rows %}<tr><td><a href="{{ url_for('tiket_detail', tid=t.id) }}">{{ t.nomor }}</a></td><td>{{ t.judul }}</td><td>{{ t.kategori }}</td><td><span class="pri p-{{ t.prioritas|lower }}">{{ t.prioritas }}</span></td><td>{{ t.pelapor }}</td><td>{{ t.petugas or '-' }}</td><td>{% with s=t.status %}{% include '_status.html' %}{% endwith %}</td></tr>{% endfor %}
-</tbody></table>{% else %}<p class="muted">Tidak ada tiket.</p>{% endif %}</div>{% endblock %}
+</tbody></table>{% else %}{% with pesan='Tidak ada tiket yang cocok.' %}{% include '_ill_empty.html' %}{% endwith %}{% endif %}</div>{% endblock %}

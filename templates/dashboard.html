@@ -1,11 +1,11 @@
-{% extends 'base.html' %}{% block title %}Dashboard{% endblock %}
-{% block body %}<h1>Dashboard</h1>
+{% extends 'base.html' %}{% from '_icons.html' import icon %}{% block title %}Dashboard{% endblock %}
+{% block body %}<div class="banner"><div><h1>Halo, {{ user.nama.split()[0] }}!</h1><p>{% if user.role=='admin' %}Pantau seluruh laporan dan tugaskan petugas yang tepat.{% elif user.role=='petugas' %}Lihat tiket yang ditugaskan kepadamu dan perbarui statusnya.{% else %}Laporkan gangguan dan pantau perkembangan penanganannya.{% endif %}</p>{% if user.role in ('pelapor','admin') %}<a class="btn light" href="{{ url_for('tiket_baru') }}">+ Buat laporan</a>{% endif %}</div>{% include '_ill_banner.html' %}</div>
 <div class="stats">
-<div class="stat st-total"><b>{{ total }}</b><span>Total tiket</span></div>
-{% for s in STATUS %}<div class="stat st-{{ s|lower }}"><b>{{ counts[s] }}</b><span>{{ s }}</span></div>{% endfor %}
-{% if user.role == 'admin' %}<div class="stat warn"><b>{{ belum }}</b><span>Belum ditugaskan</span></div>{% endif %}
+<div class="stat st-total"><i class="ic">{{ icon('ticket') }}</i><b>{{ total }}</b><span>Total tiket</span></div>
+{% for s in STATUS %}<div class="stat st-{{ s|lower }}"><i class="ic">{{ icon({"Menunggu":"clock","Diproses":"gear","Selesai":"check"}[s]) }}</i><b>{{ counts[s] }}</b><span>{{ s }}</span></div>{% endfor %}
+{% if user.role == 'admin' %}<div class="stat warn"><i class="ic">{{ icon('alert') }}</i><b>{{ belum }}</b><span>Belum ditugaskan</span></div>{% endif %}
 </div>
 <div class="card"><h2>Tiket terbaru</h2>
 {% if terbaru %}<table><thead><tr><th>Nomor</th><th>Judul</th><th>Prioritas</th><th>Status</th></tr></thead><tbody>
 {% for t in terbaru %}<tr><td><a href="{{ url_for('tiket_detail', tid=t.id) }}">{{ t.nomor }}</a></td><td>{{ t.judul }}</td><td><span class="pri p-{{ t.prioritas|lower }}">{{ t.prioritas }}</span></td><td>{% with s=t.status %}{% include '_status.html' %}{% endwith %}</td></tr>{% endfor %}
-</tbody></table>{% else %}<p class="muted">Belum ada tiket.</p>{% endif %}</div>{% endblock %}
+</tbody></table>{% else %}{% with pesan='Belum ada tiket.' %}{% include '_ill_empty.html' %}{% endwith %}{% endif %}</div>{% endblock %}

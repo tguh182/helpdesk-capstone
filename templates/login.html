@@ -1,6 +1,6 @@
 {% extends 'base.html' %}{% block title %}Login{% endblock %}
 {% block bodyclass %}auth{% endblock %}
-{% block outer %}<div class="auth-hero"><div class="hero-in">{% include "_logo.html" %}<h2>{{ APP_NAME }}</h2><p>Laporkan gangguan, pantau penanganannya, dan lihat riwayatnya dalam satu tempat.</p>
+{% block outer %}<div class="auth-hero"><div class="hero-in">{% include "_ill_hero.html" %}<h2>{{ APP_NAME }}</h2><p>Laporkan gangguan, pantau penanganannya, dan lihat riwayatnya dalam satu tempat.</p>
 <ul><li>Tiket dengan nomor otomatis</li><li>Status Menunggu, Diproses, Selesai</li><li>Riwayat penanganan yang terdokumentasi</li></ul></div></div>
 <main class="auth-form">{% with m = get_flashed_messages(with_categories=true) %}{% for c, t in m %}<div class="flash {{ c }}" role="alert">{{ t }}</div>{% endfor %}{% endwith %}<div class="card narrow"><h1>Masuk</h1><p class="muted sub">Silakan masuk untuk melanjutkan.</p>
 <form method="post"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
