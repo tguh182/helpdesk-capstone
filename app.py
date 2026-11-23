@@ -75,6 +75,55 @@ def close_db(_):
         d.close()
 
 
+def isi_contoh(c):
+    """Contoh laporan (opsional, env CONTOH_DATA=1) agar halaman tidak kosong saat demo/belajar."""
+    from datetime import timedelta
+    pel, pet, adm = 3, 2, 1
+    kat = {r[1]: r[0] for r in c.execute("SELECT id,nama FROM kategori")}
+    # (hari lalu, judul, deskripsi, kategori, prioritas, status, petugas, [(pengguna, status, catatan, menit_setelah_dibuat)])
+    data = [
+        (5, "Printer ruang administrasi tidak bisa mencetak",
+         "Printer menampilkan lampu merah berkedip dan dokumen tertahan di antrean cetak sejak pagi.",
+         "Printer", "Sedang", "Selesai", pet,
+         [(adm, "Diproses", "Ditugaskan ke Budi Petugas.", 20),
+          (pet, "Diproses", "Pengecekan awal: kertas macet di jalur belakang.", 60),
+          (pet, "Selesai", "Kertas macet dibersihkan, antrean cetak di-reset. Printer normal kembali.", 180)]),
+        (3, "Wi-Fi lantai 2 sangat lambat",
+         "Koneksi internet di lantai 2 sering terputus, terutama pada jam 10.00 sampai 12.00.",
+         "Jaringan Komputer", "Tinggi", "Diproses", pet,
+         [(adm, "Diproses", "Ditugaskan ke Budi Petugas, prioritas tinggi.", 15),
+          (pet, "Diproses", "Access point lantai 2 dicek; menunggu penggantian kabel jaringan.", 240)]),
+        (2, "Aplikasi absensi tidak bisa dibuka",
+         "Setelah pembaruan Windows, aplikasi absensi menutup sendiri saat dibuka.",
+         "Perangkat Lunak", "Sedang", "Diproses", pet,
+         [(adm, "Diproses", "Ditugaskan ke Budi Petugas.", 30),
+          (pet, "Diproses", "Aplikasi dipasang ulang pada komputer uji, masih menyelidiki penyebab.", 120)]),
+        (1, "Monitor komputer meja resepsionis berkedip",
+         "Layar berkedip tiap beberapa detik dan kadang mati sendiri.",
+         "Perangkat Keras", "Rendah", "Menunggu", None, []),
+        (0, "Permintaan akun email untuk pegawai baru",
+         "Mohon dibuatkan akun email kantor untuk pegawai baru atas nama Rina, mulai bekerja Senin depan.",
+         "Lainnya", "Rendah", "Menunggu", None, []),
+    ]
+    nomor_hari = {}
+    for hari, judul, desk, kt, pr, st, petugas, rw in data:
+        t0 = datetime.now() - timedelta(days=hari, hours=1)
+        tgl = t0.strftime("%Y%m%d")
+        nomor_hari[tgl] = nomor_hari.get(tgl, 0) + 1
+        nomor = f"TKT-{tgl}-{nomor_hari[tgl]:03d}"
+        waktu = lambda m: (t0 + timedelta(minutes=m)).strftime("%Y-%m-%d %H:%M:%S")
+        akhir = waktu(rw[-1][3]) if rw else waktu(0)
+        cur = c.execute("INSERT INTO tiket(nomor,judul,deskripsi,kategori_id,prioritas,status,pelapor_id,petugas_id,dibuat,diperbarui)"
+                        " VALUES(?,?,?,?,?,?,?,?,?,?)",
+                        (nomor, judul, desk, kat[kt], pr, st, pel, petugas, waktu(0), akhir))
+        tid = cur.lastrowid
+        c.execute("INSERT INTO riwayat(tiket_id,pengguna_id,status,catatan,waktu) VALUES(?,?,?,?,?)",
+                  (tid, pel, "Menunggu", "Tiket dibuat.", waktu(0)))
+        for uid, status, cat, m in rw:
+            c.execute("INSERT INTO riwayat(tiket_id,pengguna_id,status,catatan,waktu) VALUES(?,?,?,?,?)",
+                      (tid, uid, status, cat, waktu(m)))
+
+
 def init_db(seed=True):
     c = sqlite3.connect(app.config["DATABASE"])
     c.executescript(SCHEMA)
@@ -87,6 +136,8 @@ def init_db(seed=True):
                       (nama, u, generate_password_hash(p), r))
         for k in ["Perangkat Keras", "Jaringan Komputer", "Perangkat Lunak", "Printer", "Lainnya"]:
             c.execute("INSERT INTO kategori(nama) VALUES(?)", (k,))
+        if os.environ.get("CONTOH_DATA") == "1":
+            isi_contoh(c)
     c.commit()
     c.close()
 

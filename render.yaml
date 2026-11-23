@@ -11,3 +11,5 @@ services:
         generateValue: true
       - key: HTTPS_ONLY
         value: "1"
+      - key: CONTOH_DATA
+        value: "1"
