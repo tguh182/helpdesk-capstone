@@ -1,7 +1,7 @@
 {% extends 'base.html' %}{% block title %}{{ t.nomor }}{% endblock %}
 {% block body %}<h1>{{ t.nomor }} {% with s=t.status %}{% include '_status.html' %}{% endwith %}</h1>
 <div class="grid2"><div class="card"><h2>{{ t.judul }}</h2><p class="pre">{{ t.deskripsi }}</p>
-<dl><dt>Kategori</dt><dd>{{ t.kategori }}</dd><dt>Prioritas</dt><dd>{{ t.prioritas }}</dd><dt>Pelapor</dt><dd>{{ t.pelapor }}</dd><dt>Petugas</dt><dd>{{ t.petugas or 'Belum ditugaskan' }}</dd><dt>Dibuat</dt><dd>{{ t.dibuat }}</dd><dt>Diperbarui</dt><dd>{{ t.diperbarui }}</dd></dl></div>
+<dl><dt>Kategori</dt><dd>{{ t.kategori }}</dd><dt>Prioritas</dt><dd><span class="pri p-{{ t.prioritas|lower }}">{{ t.prioritas }}</span></dd><dt>Pelapor</dt><dd>{{ t.pelapor }}</dd><dt>Petugas</dt><dd>{{ t.petugas or 'Belum ditugaskan' }}</dd><dt>Dibuat</dt><dd>{{ t.dibuat }}</dd><dt>Diperbarui</dt><dd>{{ t.diperbarui }}</dd></dl></div>
 <div>
 {% if user.role == 'admin' %}<div class="card"><h2>Penugasan</h2><form method="post" action="{{ url_for('tiket_atur', tid=t.id) }}"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
 <label>Petugas<select name="petugas_id"><option value="">- Belum ditugaskan -</option>{% for p in petugas %}<option value="{{ p.id }}" {{ 'selected' if t.petugas_id==p.id }}>{{ p.nama }}</option>{% endfor %}</select></label>

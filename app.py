@@ -182,6 +182,7 @@ def check_csrf():
 @app.context_processor
 def inject():
     return dict(user=current_user(), csrf_token=csrf_token, ROLES=ROLES,
+                APP_NAME=os.environ.get("APP_NAME", "Helpdesk TI"),
                 STATUS=STATUS, PRIORITAS=PRIORITAS)
 
 

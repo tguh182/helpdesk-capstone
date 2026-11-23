@@ -1,11 +1,11 @@
 {% extends 'base.html' %}{% block title %}Dashboard{% endblock %}
 {% block body %}<h1>Dashboard</h1>
 <div class="stats">
-<div class="stat"><b>{{ total }}</b><span>Total tiket</span></div>
-{% for s in STATUS %}<div class="stat"><b>{{ counts[s] }}</b><span>{{ s }}</span></div>{% endfor %}
+<div class="stat st-total"><b>{{ total }}</b><span>Total tiket</span></div>
+{% for s in STATUS %}<div class="stat st-{{ s|lower }}"><b>{{ counts[s] }}</b><span>{{ s }}</span></div>{% endfor %}
 {% if user.role == 'admin' %}<div class="stat warn"><b>{{ belum }}</b><span>Belum ditugaskan</span></div>{% endif %}
 </div>
 <div class="card"><h2>Tiket terbaru</h2>
 {% if terbaru %}<table><thead><tr><th>Nomor</th><th>Judul</th><th>Prioritas</th><th>Status</th></tr></thead><tbody>
-{% for t in terbaru %}<tr><td><a href="{{ url_for('tiket_detail', tid=t.id) }}">{{ t.nomor }}</a></td><td>{{ t.judul }}</td><td>{{ t.prioritas }}</td><td>{% with s=t.status %}{% include '_status.html' %}{% endwith %}</td></tr>{% endfor %}
+{% for t in terbaru %}<tr><td><a href="{{ url_for('tiket_detail', tid=t.id) }}">{{ t.nomor }}</a></td><td>{{ t.judul }}</td><td><span class="pri p-{{ t.prioritas|lower }}">{{ t.prioritas }}</span></td><td>{% with s=t.status %}{% include '_status.html' %}{% endwith %}</td></tr>{% endfor %}
 </tbody></table>{% else %}<p class="muted">Belum ada tiket.</p>{% endif %}</div>{% endblock %}
