@@ -3,7 +3,7 @@
 {% macro batang(items) %}{% if items|sum(attribute='n') %}<div class="hbars">{% set mx = items|map(attribute='n')|max %}{% for i in items %}<div class="hb"><span class="hb-l" title="{{ i.label }}">{{ i.label }}</span><div class="hb-t"><i style="width:{{ (i.n*100/mx)|round|int }}%;background:{{ i.warna }}"></i></div><b>{{ i.n }}</b></div>{% endfor %}</div>{% else %}<p class="muted">Tidak ada data.</p>{% endif %}{% endmacro %}
 {% block body %}
 <div class="head-row"><h1>Rekapitulasi Laporan</h1>
-<div class="actions"><a class="btn ghost" href="{{ url_for('rekap') }}.csv?{{ query }}">Unduh CSV</a><button type="button" class="btn ghost" onclick="window.print()">Cetak</button></div></div>
+<div class="actions"><a class="btn ghost" href="{{ url_for('rekap_csv') }}?{{ query }}">Unduh CSV</a><button type="button" class="btn ghost" onclick="window.print()">Cetak</button></div></div>
 <form method="get" class="filters noprint">
 <label>Dari<input type="date" name="dari" value="{{ f.dari }}"></label><label>Sampai<input type="date" name="sampai" value="{{ f.sampai }}"></label>
 <label>Kategori<select name="kategori"><option value="">Semua</option>{% for k in kat %}<option value="{{ k.id }}" {{ 'selected' if f.kategori==k.id|string }}>{{ k.nama }}</option>{% endfor %}</select></label>

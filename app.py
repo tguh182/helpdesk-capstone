@@ -461,7 +461,7 @@ def admin_kategori_hapus(kid):
 
 # ---------- rekapitulasi ----------
 @app.route("/rekap")
-@app.route("/rekap.csv")
+@app.route("/rekap.csv", endpoint="rekap_csv")
 @login_required("admin", "petugas")
 def rekap():
     u = current_user()
