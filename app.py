@@ -3,7 +3,9 @@ import os, secrets, sqlite3
 from datetime import datetime
 from functools import wraps
 from flask import (Flask, g, render_template, request, redirect, url_for,
-                   session, flash, abort)
+                   session, flash, abort, Response)
+import csv, io
+import grafik
 from werkzeug.security import generate_password_hash, check_password_hash
 
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -459,6 +461,7 @@ def admin_kategori_hapus(kid):
 
 # ---------- rekapitulasi ----------
 @app.route("/rekap")
+@app.route("/rekap.csv")
 @login_required("admin", "petugas")
 def rekap():
     u = current_user()
@@ -478,13 +481,48 @@ def rekap():
         cond.append("t.petugas_id=?"); a.append(int(f["petugas"]))
     w = (" WHERE " + " AND ".join(cond)) if cond else ""
     rows = db().execute(BASE_Q + w + " ORDER BY t.id DESC", a).fetchall()
-    per_status = db().execute("SELECT t.status k, COUNT(*) n FROM tiket t" + w + " GROUP BY t.status", a).fetchall()
-    per_kat = db().execute("SELECT COALESCE(k.nama,'-') k, COUNT(*) n FROM tiket t LEFT JOIN kategori k ON k.id=t.kategori_id"
-                           + w + " GROUP BY k.nama ORDER BY n DESC", a).fetchall()
+
+    if request.path.endswith(".csv"):  # unduh untuk evaluasi di Excel
+        def aman(v):  # cegah formula injection saat dibuka di spreadsheet
+            v = "" if v is None else str(v)
+            return "'" + v if v[:1] in ("=", "+", "-", "@") else v
+        out = io.StringIO(); wr = csv.writer(out)
+        wr.writerow(["Nomor", "Tanggal", "Judul", "Kategori", "Prioritas", "Petugas", "Status"])
+        for t in rows:
+            wr.writerow([aman(t["nomor"]), t["dibuat"][:10], aman(t["judul"]), aman(t["kategori"]),
+                         t["prioritas"], aman(t["petugas"] or "-"), t["status"]])
+        return Response("\ufeff" + out.getvalue(), mimetype="text/csv",
+                        headers={"Content-Disposition": "attachment; filename=rekapitulasi-sitiket.csv"})
+
+    q = lambda sql: db().execute(sql.replace("{w}", w), a).fetchall()
+    ps = {r["k"]: r["n"] for r in q("SELECT t.status k, COUNT(*) n FROM tiket t{w} GROUP BY t.status")}
+    pp = {r["k"]: r["n"] for r in q("SELECT t.prioritas k, COUNT(*) n FROM tiket t{w} GROUP BY t.prioritas")}
+    per_status = grafik.potongan([(s_, ps.get(s_, 0)) for s_ in STATUS], grafik.WARNA_STATUS)
+    per_pri = grafik.potongan([(p_, pp.get(p_, 0)) for p_ in PRIORITAS], grafik.WARNA_PRIORITAS)
+    kat_rows = q("SELECT COALESCE(k.nama,'-') k, COUNT(*) n FROM tiket t LEFT JOIN kategori k ON k.id=t.kategori_id{w} GROUP BY k.nama ORDER BY n DESC")
+    per_kat = grafik.potongan([(r["k"], r["n"]) for r in kat_rows], grafik.PALET)
+    pet_rows = q("SELECT COALESCE(p.nama,'Belum ditugaskan') k, COUNT(*) n FROM tiket t LEFT JOIN pengguna p ON p.id=t.petugas_id{w} GROUP BY p.nama ORDER BY n DESC")
+    per_pet = grafik.potongan([(r["k"], r["n"]) for r in pet_rows], grafik.PALET[::-1])
+    total = len(rows)
+    selesai = ps.get("Selesai", 0)
+    lama = [(datetime.strptime(t["diperbarui"], "%Y-%m-%d %H:%M:%S") - datetime.strptime(t["dibuat"], "%Y-%m-%d %H:%M:%S")).total_seconds() / 60
+            for t in rows if t["status"] == "Selesai" and t["diperbarui"] and t["dibuat"]]
+    kpi = dict(total=total, selesai=selesai, persen=round(selesai * 100 / total) if total else 0,
+               belum=sum(1 for t in rows if not t["petugas"] and t["status"] != "Selesai"),
+               rata=grafik.format_durasi(sum(lama) / len(lama) if lama else None))
+    per_hari = {}
+    for t in rows:
+        per_hari[t["dibuat"][:10]] = per_hari.get(t["dibuat"][:10], 0) + 1
+    try:
+        akhir = datetime.strptime(f["sampai"], "%Y-%m-%d").date() if f["sampai"] else None
+    except ValueError:
+        akhir = None
     kat = db().execute("SELECT * FROM kategori ORDER BY nama").fetchall()
     petugas = db().execute("SELECT id,nama FROM pengguna WHERE role='petugas' ORDER BY nama").fetchall()
-    return render_template("rekap.html", rows=rows, f=f, kat=kat, petugas=petugas,
-                           per_status=per_status, per_kat=per_kat)
+    return render_template("rekap.html", rows=rows, f=f, kat=kat, petugas=petugas, kpi=kpi,
+                           per_status=per_status, per_pri=per_pri, per_kat=per_kat, per_pet=per_pet,
+                           donat_status=grafik.donat(per_status), donat_pri=grafik.donat(per_pri),
+                           tren=grafik.tren(per_hari, akhir), query=request.query_string.decode())
 
 
 init_db()  # membuat tabel dan data awal bila belum ada (juga saat dijalankan oleh gunicorn)

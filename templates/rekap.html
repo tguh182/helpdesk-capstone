@@ -1,12 +1,29 @@
 {% extends 'base.html' %}{% block title %}Rekapitulasi{% endblock %}
-{% block body %}<h1>Rekapitulasi Laporan</h1>
-<form method="get" class="filters">
+{% macro legenda(items) %}<ul class="legend">{% for i in items %}<li><i style="background:{{ i.warna }}"></i><span>{{ i.label }}</span><b>{{ i.n }}</b><small>{{ i.persen }}%</small></li>{% endfor %}</ul>{% endmacro %}
+{% macro batang(items) %}{% if items|sum(attribute='n') %}<div class="hbars">{% set mx = items|map(attribute='n')|max %}{% for i in items %}<div class="hb"><span class="hb-l" title="{{ i.label }}">{{ i.label }}</span><div class="hb-t"><i style="width:{{ (i.n*100/mx)|round|int }}%;background:{{ i.warna }}"></i></div><b>{{ i.n }}</b></div>{% endfor %}</div>{% else %}<p class="muted">Tidak ada data.</p>{% endif %}{% endmacro %}
+{% block body %}
+<div class="head-row"><h1>Rekapitulasi Laporan</h1>
+<div class="actions"><a class="btn ghost" href="{{ url_for('rekap') }}.csv?{{ query }}">Unduh CSV</a><button type="button" class="btn ghost" onclick="window.print()">Cetak</button></div></div>
+<form method="get" class="filters noprint">
 <label>Dari<input type="date" name="dari" value="{{ f.dari }}"></label><label>Sampai<input type="date" name="sampai" value="{{ f.sampai }}"></label>
 <label>Kategori<select name="kategori"><option value="">Semua</option>{% for k in kat %}<option value="{{ k.id }}" {{ 'selected' if f.kategori==k.id|string }}>{{ k.nama }}</option>{% endfor %}</select></label>
 <label>Status<select name="status"><option value="">Semua</option>{% for s in STATUS %}<option {{ 'selected' if f.status==s }}>{{ s }}</option>{% endfor %}</select></label>
 {% if user.role == 'admin' %}<label>Petugas<select name="petugas"><option value="">Semua</option>{% for p in petugas %}<option value="{{ p.id }}" {{ 'selected' if f.petugas==p.id|string }}>{{ p.nama }}</option>{% endfor %}</select></label>{% endif %}
 <button class="btn">Terapkan</button></form>
-<div class="grid2"><div class="card"><h2>Per status</h2><table><tbody>{% for r in per_status %}<tr><td>{{ r.k }}</td><td class="barc"><div class="bar"><i style="width:{{ (r.n*100/(rows|length or 1))|round|int }}%"></i></div></td><td class="num">{{ r.n }}</td></tr>{% else %}<tr><td class="muted">Tidak ada data</td></tr>{% endfor %}</tbody></table></div>
-<div class="card"><h2>Per kategori</h2><table><tbody>{% for r in per_kat %}<tr><td>{{ r.k }}</td><td class="barc"><div class="bar"><i style="width:{{ (r.n*100/(rows|length or 1))|round|int }}%"></i></div></td><td class="num">{{ r.n }}</td></tr>{% else %}<tr><td class="muted">Tidak ada data</td></tr>{% endfor %}</tbody></table></div></div>
+
+<div class="stats">
+<div class="stat st-total"><b>{{ kpi.total }}</b><span>Total laporan</span></div>
+<div class="stat st-selesai"><b>{{ kpi.persen }}%</b><span>Tingkat penyelesaian ({{ kpi.selesai }} dari {{ kpi.total }})</span></div>
+<div class="stat st-diproses"><b>{{ kpi.rata }}</b><span>Rata-rata waktu penyelesaian</span></div>
+<div class="stat warn"><b>{{ kpi.belum }}</b><span>Belum ditugaskan</span></div></div>
+
+<div class="grid2 g2">
+<div class="card"><h2>Status laporan</h2><div class="donut-row"><div class="donut">{{ donat_status }}</div>{{ legenda(per_status) }}</div></div>
+<div class="card"><h2>Prioritas laporan</h2><div class="donut-row"><div class="donut">{{ donat_pri }}</div>{{ legenda(per_pri) }}</div></div>
+<div class="card"><h2>Laporan per kategori</h2>{{ batang(per_kat) }}</div>
+{% if user.role == 'admin' %}<div class="card"><h2>Beban kerja per petugas</h2>{{ batang(per_pet) }}</div>{% endif %}
+</div>
+<div class="card"><h2>Laporan masuk per hari <small class="muted">(14 hari terakhir)</small></h2><div class="trend">{{ tren }}</div></div>
+
 <div class="card scroll"><h2>Daftar tiket ({{ rows|length }})</h2><table><thead><tr><th>Nomor</th><th>Tanggal</th><th>Judul</th><th>Kategori</th><th>Prioritas</th><th>Petugas</th><th>Status</th></tr></thead><tbody>
-{% for t in rows %}<tr><td><a href="{{ url_for('tiket_detail', tid=t.id) }}">{{ t.nomor }}</a></td><td>{{ t.dibuat[:10] }}</td><td>{{ t.judul }}</td><td>{{ t.kategori }}</td><td><span class="pri p-{{ t.prioritas|lower }}">{{ t.prioritas }}</span></td><td>{{ t.petugas or '-' }}</td><td>{% with s=t.status %}{% include '_status.html' %}{% endwith %}</td></tr>{% endfor %}</tbody></table></div>{% endblock %}
+{% for t in rows %}<tr><td class="nw"><a href="{{ url_for('tiket_detail', tid=t.id) }}">{{ t.nomor }}</a></td><td class="nw">{{ t.dibuat[:10] }}</td><td>{{ t.judul }}</td><td>{{ t.kategori }}</td><td><span class="pri p-{{ t.prioritas|lower }}">{{ t.prioritas }}</span></td><td>{{ t.petugas or '-' }}</td><td>{% with s=t.status %}{% include '_status.html' %}{% endwith %}</td></tr>{% else %}<tr><td colspan="7" class="muted">Tidak ada data.</td></tr>{% endfor %}</tbody></table></div>{% endblock %}
